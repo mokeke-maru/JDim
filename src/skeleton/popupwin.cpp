@@ -106,6 +106,12 @@ void PopupWin::move_resize_conventional()
     const int width_desktop = rect.get_width();
     const int height_desktop = rect.get_height();
 
+    // 作業領域上のマウス座標を計算する。
+    const int x_desktop = rect.get_x();
+    const int y_desktop = rect.get_y();
+    const int x_mouse_local = x_mouse - x_desktop;
+    const int y_mouse_local = y_mouse - y_desktop;
+
     // クライアントのサイズを取得
     const int width_client = m_view->width_client();
     const int height_client = m_view->height_client();
@@ -113,27 +119,27 @@ void PopupWin::move_resize_conventional()
     // x 座標と幅
     const int width_popup = width_client;
     int x_popup;
-    if( x_mouse + m_mrg_x + width_popup <= width_desktop ) x_popup = x_mouse + m_mrg_x;
-    else x_popup = MAX( 0, width_desktop - width_popup );
+    if( x_mouse_local + m_mrg_x + width_popup <= width_desktop ) x_popup = x_mouse + m_mrg_x;
+    else x_popup = x_desktop + MAX( 0, width_desktop - width_popup );
 
     // y 座標と高さ
     int y_popup;  
     int height_popup;
-    if( y_mouse - ( height_client + m_mrg_y ) >= 0 ){  // 上にスペースがある
+    if( y_mouse_local - ( height_client + m_mrg_y ) >= 0 ){  // 上にスペースがある
         y_popup = y_mouse - height_client - m_mrg_y;
         height_popup = height_client;
     }
-    else if( y_mouse + m_mrg_y + height_client <= height_desktop ){ // 下にスペースがある
+    else if( y_mouse_local + m_mrg_y + height_client <= height_desktop ){ // 下にスペースがある
         y_popup = y_mouse + m_mrg_y;
         height_popup = height_client;
     }
-    else if( m_view->get_popup_upside() || y_mouse > height_desktop/2 ){ // スペースは無いが上に表示
-        y_popup = MAX( 0, y_mouse - ( height_client + m_mrg_y ) );
-        height_popup = y_mouse - ( y_popup + m_mrg_y );
+    else if( m_view->get_popup_upside() || y_mouse_local > height_desktop/2 ){ // スペースは無いが上に表示
+        y_popup = y_desktop + MAX( 0, y_mouse_local - ( height_client + m_mrg_y ) );
+        height_popup = y_mouse_local - ( y_popup - y_desktop + m_mrg_y );
     }
     else{ // 下
         y_popup = y_mouse + m_mrg_y;
-        height_popup = height_desktop - y_popup;
+        height_popup = height_desktop - ( y_mouse_local + m_mrg_y );
     }
 
 #ifdef _DEBUG
